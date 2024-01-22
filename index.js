@@ -87,7 +87,7 @@ app.post('/post/', (require, response) => {
   response.json(note)
 })
 
-const PORT = 3012
+const PORT = process.env.PORT || 3012
 app.listen(PORT, () => {
   console.log('Servidor levantado')
 })
