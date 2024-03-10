@@ -1,0 +1,9 @@
+{
+    "eslint.execArgv": null,
+   "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    
+},
+"editor.cursorBlinking": "expand",
+"editor.wordWrap": "on"
+}

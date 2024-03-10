@@ -18,18 +18,6 @@ let DATA = [
     date: '2024-01-16T04:04:10.101Z'
   }
 ]
-// Crear servidor con require con http
-/*
-"Con http"
-
-const http = require("http")
-
-const app = http.createServer((require, response) => {
-    response.writeHead(200, { "Content-Type": "application/json" })
-    response.end(JSON.stringify(DATA))
-})
-
-*/
 
 // con expres
 const express = require('express')
