@@ -1,27 +1,7 @@
-let DATA = [
-  {
-    id: 1,
-    content: 'id labore ex et quam rica cols',
-    important: false,
-    date: '2024-01-16T04:04:08.101Z'
-  },
-  {
-    id: 2,
-    content: 'quo vero reiciendis velit similique earum',
-    important: true,
-    date: '2024-01-16T04:04:09.101Z'
-  },
-  {
-    id: 3,
-    content: 'odio adipisci rerum aut animi',
-    important: false,
-    date: '2024-01-16T04:04:10.101Z'
-  }
-]
-
-// con expres
+const { connectDatabase, disconnectDatabase } = require('./mongoose.js')
 const express = require('express')
 const cors = require('cors')
+const Note = require('./models/Note.js')
 
 const app = express()
 app.use(express.json())
@@ -31,11 +11,42 @@ app.get('/', (require, response) => {
   response.send('<h1>Hola mundo</h1>')
 })
 
-app.get('/json', (require, response) => {
-  response.json(DATA)
+app.get('/json', async (require, response) => {
+  await connectDatabase()
+
+  try {
+    const notes = await Note.find({})
+    disconnectDatabase()
+    response.json(notes)
+  } catch (error) {
+    console.log(error)
+  }
 })
 
-app.get('/notes/:id', (require, response) => {
+app.post('/post/', async (require, response) => {
+  const { content, important } = require.body
+
+  if (!content) {
+    return response.status(400).json({
+      error: 'note.content is missing'
+    })
+  }
+
+  await connectDatabase()
+
+  const note = new Note({
+    content,
+    important: important || false,
+    date: new Date()
+  })
+
+  const prom = await note.save()
+  await disconnectDatabase()
+
+  response.json(prom)
+})
+
+/* app.get('/notes/:id', (require, response) => {
   const id = Number(require.params.id)
   const res = DATA.find(v => id === v.id)
   if (res) response.json(res)
@@ -73,7 +84,7 @@ app.post('/post/', (require, response) => {
 
   DATA = [...DATA, newDate]
   response.json(note)
-})
+}) */
 
 const PORT = process.env.PORT || 3012
 app.listen(PORT, () => {
