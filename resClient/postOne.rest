@@ -2,5 +2,5 @@ POST http://localhost:3012/post
 Content-Type: application/json
 
 {
-    "content": "la cucaracha ya no puede caminar"
+    "content": "la cucaracha rapida"
 }

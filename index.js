@@ -1,30 +1,30 @@
-const { connectDatabase, disconnectDatabase } = require('./mongoose.js')
+require('dotenv').config()
+require('./mongoose.js')
+const mongoose = require('mongoose')
 const express = require('express')
 const cors = require('cors')
 const Note = require('./models/Note.js')
+const notFound = require('./notFound.js')
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 
-app.get('/', (require, response) => {
+app.get('/', (request, response) => {
   response.send('<h1>Hola mundo</h1>')
 })
 
-app.get('/json', async (require, response) => {
-  await connectDatabase()
-
+app.get('/json', async (request, response) => {
   try {
     const notes = await Note.find({})
-    disconnectDatabase()
     response.json(notes)
   } catch (error) {
     console.log(error)
   }
 })
 
-app.post('/post/', async (require, response) => {
-  const { content, important } = require.body
+app.post('/post/', async (request, response) => {
+  const { content, important } = request.body
 
   if (!content) {
     return response.status(400).json({
@@ -32,61 +32,69 @@ app.post('/post/', async (require, response) => {
     })
   }
 
-  await connectDatabase()
-
   const note = new Note({
     content,
     important: important || false,
     date: new Date()
   })
-
   const prom = await note.save()
-  await disconnectDatabase()
 
   response.json(prom)
 })
 
-/* app.get('/notes/:id', (require, response) => {
-  const id = Number(require.params.id)
-  const res = DATA.find(v => id === v.id)
-  if (res) response.json(res)
-  else response.status(404).end()
+app.get('/exit', (request, response) => {
+  mongoose.disconnect()
+    .then(() => console.log('servidor desconcectado'))
+  response.status(400)
 })
 
-app.delete('/delete/:id', (require, response) => {
-  const id = Number(require.params.id)
-
-  console.log(id)
-
-  DATA = DATA.filter(v => v.id !== id)
-  response.status(204).end()
+app.get('/notes/:id', async (request, response, next) => {
+  const { id } = request.params
+  try {
+    const res = await Note.findById(id)
+    response.json(res)
+  } catch (error) {
+    next(error)
+  }
 })
 
-app.post('/post/', (require, response) => {
-  const note = require.body
-
-  if (!note || !note.content) {
-    return response.status(400).json({
-      error: 'note.content is missing'
-    })
+app.delete('/delete/:id', async (request, response, next) => {
+  const { id } = request.params
+  try {
+    const resp = await Note.findByIdAndDelete(id)
+    response.status(204).end()
+  } catch (error) {
+    next(error)
   }
+})
 
-  const ids = DATA.map(e => e.id)
-  const maxId = Math.max(...ids)
-  const newDate = {
+app.put('/put/:id', async (request, response, next) => {
+  const { id } = request.params
+  const { content, important } = request.body
 
-    id: maxId + 1,
-    content: note.content,
-    important: typeof note.important !== 'undefined' ? note.important : false,
-    date: new Date().toISOString()
-
+  try {
+    const resp = await Note.findByIdAndUpdate(
+      id,
+      { content, important },
+      { new: true })
+    response.json(resp)
+  } catch (error) {
+    next(error)
   }
+})
 
-  DATA = [...DATA, newDate]
-  response.json(note)
-}) */
+app.use(notFound)
 
-const PORT = process.env.PORT || 3012
+app.use((error, request, response, next) => {
+  if (error.name === 'CastError') {
+    response.status(400).send({
+      error: 'id used is malformed',
+      ErrorName: 'CastError'
+    }).end()
+  } else { response.status(500).send({ error: 'ops a ocurrido un error' }) }
+})
+
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log('Servidor levantado')
 })

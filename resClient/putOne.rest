@@ -1,0 +1,6 @@
+PUT http://localhost:3012/put/65ee5d4b0a91015ca9161190
+Content-Type: application/json
+
+{
+    "content": "la cucaracha se le rompia la patita"
+}
