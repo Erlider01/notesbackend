@@ -92,7 +92,3 @@ const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log('Servidor levantado')
 })
-
-process.on('uncaughtException', () => {
-  mongoose.connection.disconnect()
-})
