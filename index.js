@@ -5,6 +5,7 @@ const express = require('express')
 const cors = require('cors')
 const Note = require('./models/Note.js')
 const notFound = require('./notFound.js')
+const handlerErrors = require('./handlerErrors.js')
 
 const app = express()
 app.use(express.json())
@@ -85,16 +86,13 @@ app.put('/put/:id', async (request, response, next) => {
 
 app.use(notFound)
 
-app.use((error, request, response, next) => {
-  if (error.name === 'CastError') {
-    response.status(400).send({
-      error: 'id used is malformed',
-      ErrorName: 'CastError'
-    }).end()
-  } else { response.status(500).send({ error: 'ops a ocurrido un error' }) }
-})
+app.use(handlerErrors)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log('Servidor levantado')
+})
+
+process.on('uncaughtException', () => {
+  mongoose.connection.disconnect()
 })
