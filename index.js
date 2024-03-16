@@ -62,7 +62,7 @@ app.get('/notes/:id', async (request, response, next) => {
 app.delete('/delete/:id', async (request, response, next) => {
   const { id } = request.params
   try {
-    const resp = await Note.findByIdAndDelete(id)
+    await Note.deleteOne({ _id: id })
     response.status(204).end()
   } catch (error) {
     next(error)
@@ -89,6 +89,8 @@ app.use(notFound)
 app.use(handlerErrors)
 
 const PORT = process.env.PORT
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('Servidor levantado')
 })
+
+module.exports = { app, server }
