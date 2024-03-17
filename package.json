@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
-    "test": "cross-env NODE_ENV=test jest --verbose --detectOpenHandles --silent test/note.test.js ",
+    "test": "cross-env NODE_ENV=test PORT=3014 jest --verbose --detectOpenHandles --silent test/user.test.js ",
     "test:watch": "npm run test -- --watch",
     "dev": "cross-env NODE_ENV=development nodemon index.js"
   },
@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "2.8.5",
     "cross-env": "7.0.3",
     "dotenv": "16.4.5",

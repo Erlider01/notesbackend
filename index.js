@@ -6,6 +6,7 @@ const cors = require('cors')
 const Note = require('./models/Note.js')
 const notFound = require('./notFound.js')
 const handlerErrors = require('./handlerErrors.js')
+const usersRouter = require('./controllers/users.js')
 
 const app = express()
 app.use(express.json())
@@ -83,6 +84,8 @@ app.put('/put/:id', async (request, response, next) => {
     next(error)
   }
 })
+
+app.use('/api/users', usersRouter)
 
 app.use(notFound)
 

@@ -17,7 +17,7 @@ beforeEach(async () => {
   }
 })
 
-describe('GET Notes', () => {
+describe('GET all Notes', () => {
   test('are return as json', async () => {
     await api
       .get('/json')
@@ -33,6 +33,24 @@ describe('GET Notes', () => {
   test('the first should match the added one', async () => {
     const { contents } = await getAllContentFromNotes()
     expect(contents).toContain(initialNotes[0].content)
+  })
+})
+
+describe('GET note by id,', () => {
+  test('must find a note', async () => {
+    const { ids: idFirst, response } = await getAllContentFromNotes()
+    const id = idFirst[0]
+
+    const data = await api.get(`/notes/${id}`)
+    expect(data.body.id).toBe(response.body[0].id)
+  })
+  test('error if invalid argument is passed', async () => {
+    const response = await api
+      .get('/notes/1234')
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(response.body.ErrorName).toBe('CastError')
   })
 })
 
@@ -100,6 +118,75 @@ describe('DELETE Notes,', () => {
 
     const { response } = await getAllContentFromNotes()
     expect(response.body).toHaveLength(initialNotes.length)
+  })
+})
+
+describe('PUT by id,', () => {
+  test('if the id exists, you can change the content', async () => {
+    let { ids } = await getAllContentFromNotes()
+    ids = ids[0]
+
+    const contentTemp = {
+      content: 'changeContain'
+    }
+
+    const response = await api
+      .put(`/put/${ids}`)
+      .send(contentTemp)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const { response: responseFinaly } = await getAllContentFromNotes()
+
+    expect(response.body.content).toBe(contentTemp.content)
+    expect(response.body.id).toBe(ids)
+    expect(responseFinaly.body[0].content).toBe(contentTemp.content)
+    expect(responseFinaly.body[0].id).toBe(response.body.id)
+  })
+
+  test('if the id exists, you can change content and important', async () => {
+    let { ids } = await getAllContentFromNotes()
+    ids = ids[0]
+
+    const contentTemp = {
+      content: 'changeContain',
+      important: false
+    }
+
+    const response = await api
+      .put(`/put/${ids}`)
+      .send(contentTemp)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const { response: responseFinaly } = await getAllContentFromNotes()
+
+    expect(response.body.content).toBe(contentTemp.content)
+    expect(response.body.important).toBe(contentTemp.important)
+    expect(response.body.id).toBe(ids)
+
+    expect(responseFinaly.body[0].content).toBe(contentTemp.content)
+    expect(responseFinaly.body[0].important).toBe(contentTemp.important)
+    expect(responseFinaly.body[0].id).toBe(response.body.id)
+  })
+
+  test('If the id does not exist, you cannot change content', async () => {
+    const contentTemp = {
+      content: 'changeContain',
+      important: false
+    }
+
+    const response = await api
+      .put('/put/123456')
+      .send(contentTemp)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(response.body.ErrorName).toBe('CastError')
+
+    const { contents } = await getAllContentFromNotes()
+
+    expect(contents).not.toContain(contentTemp.content)
   })
 })
 
