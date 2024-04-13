@@ -9,5 +9,5 @@ mongoose.connect(connectionString).then(() => {
 })
 
 process.on('uncaughtException', () => {
-  mongoose.connection.disconnect()
+  mongoose.disconnect()
 })

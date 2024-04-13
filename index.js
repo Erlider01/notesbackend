@@ -12,6 +12,8 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
+console.log(process.env.PORT);
+
 app.get('/', (request, response) => {
   response.send('<h1>Hola mundo</h1>')
 })
