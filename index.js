@@ -12,8 +12,6 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-console.log(process.env.PORT);
-
 app.get('/', (request, response) => {
   response.send('<h1>Hola mundo</h1>')
 })
@@ -95,7 +93,7 @@ app.use(handlerErrors)
 
 const PORT = process.env.PORT
 const server = app.listen(PORT, () => {
-  console.log('Servidor levantado')
+  console.log(`Server deployed in http://localhost:${PORT}`)
 })
 
 module.exports = { app, server }
